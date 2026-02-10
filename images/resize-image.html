@@ -6,6 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="../css/site.css" />
   <script defer src="../js/site.js"></script>
+  <script defer src="../js/resize-image.js"></script>
+
 </head>
 <body>
 
@@ -24,8 +26,77 @@
   <p class="tool-desc">Resize JPG/PNG/WebP by pixels or percentage — privately in your browser.</p>
 
   <section class="card" id="tool">
-    <p class="hint">Tool UI goes here next (file picker + resize controls).</p>
-  </section>
+  <div class="grid">
+    <div>
+      <label class="label">1) Choose an image</label>
+      <div id="dropzone" class="dropzone" tabindex="0" role="button" aria-label="Drop an image here or click to select">
+        <strong>Drop image here</strong>
+        <div class="hint">or click to select (JPG / PNG / WebP)</div>
+        <input id="fileInput" type="file" accept="image/*" hidden />
+      </div>
+      <div id="fileInfo" class="hint" style="margin-top:8px;"></div>
+    </div>
+
+    <div>
+      <label class="label">2) Resize settings</label>
+
+      <div class="row">
+        <label><input type="radio" name="mode" value="percent" checked /> Percentage</label>
+        <label><input type="radio" name="mode" value="pixels" /> Pixels</label>
+      </div>
+
+      <div id="percentBox" class="box">
+        <label class="label">Scale (%)</label>
+        <input id="percent" type="number" min="1" max="500" value="100" />
+        <div class="hint">100% keeps the same size. 50% halves it.</div>
+      </div>
+
+      <div id="pixelsBox" class="box" style="display:none;">
+        <div class="row">
+          <div style="flex:1;">
+            <label class="label">Width (px)</label>
+            <input id="width" type="number" min="1" />
+          </div>
+          <div style="flex:1;">
+            <label class="label">Height (px)</label>
+            <input id="height" type="number" min="1" />
+          </div>
+        </div>
+
+        <label class="row" style="margin-top:10px;">
+          <input id="lockAspect" type="checkbox" checked />
+          Lock aspect ratio
+        </label>
+
+        <div class="hint">If locked, changing width updates height automatically.</div>
+      </div>
+
+      <div class="row" style="margin-top:12px;">
+        <button id="resizeBtn" disabled>Resize</button>
+        <button id="downloadBtn" disabled>Download</button>
+      </div>
+
+      <div id="status" class="hint" style="margin-top:10px;"></div>
+      <div id="error" class="error" style="display:none;"></div>
+    </div>
+  </div>
+
+  <hr style="margin:16px 0; border:none; border-top:1px solid #eee;" />
+
+  <div class="grid">
+    <div>
+      <label class="label">Original</label>
+      <img id="previewIn" alt="Original preview" style="max-width:100%; display:none;" />
+      <div id="metaIn" class="hint"></div>
+    </div>
+    <div>
+      <label class="label">Resized</label>
+      <img id="previewOut" alt="Resized preview" style="max-width:100%; display:none;" />
+      <div id="metaOut" class="hint"></div>
+    </div>
+  </div>
+</section>
+
 
   <section style="margin-top:16px">
     <h2>How it works</h2>

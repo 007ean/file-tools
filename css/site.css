@@ -11,3 +11,14 @@ a { color: inherit; }
 .tool-title { margin: 0 0 6px; }
 .tool-desc { margin: 0 0 14px; color: #444; }
 .hint { font-size: 13px; color: #555; }
+.label { display:block; font-size: 13px; color:#333; margin-bottom:6px; }
+input[type="number"] { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 10px; }
+button { padding: 10px 14px; border: 1px solid #ddd; border-radius: 10px; background: #fafafa; cursor: pointer; }
+button:disabled { opacity: 0.6; cursor: not-allowed; }
+.row { display:flex; gap:12px; align-items:center; flex-wrap: wrap; }
+.grid { display:grid; grid-template-columns: 1fr; gap:16px; }
+@media (min-width: 900px) { .grid { grid-template-columns: 1fr 1fr; } }
+.box { padding: 12px; border: 1px solid #eee; border-radius: 12px; }
+.dropzone { border: 2px dashed #ddd; border-radius: 14px; padding: 16px; cursor:pointer; }
+.dropzone:focus { outline: 3px solid #ddd; outline-offset: 4px; }
+.error { margin-top: 10px; padding: 10px; border: 1px solid #f2caca; background: #fff5f5; border-radius: 10px; color: #7a1f1f; }
