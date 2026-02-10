@@ -1,0 +1,13 @@
+:root { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; line-height: 1.4; }
+body { margin: 0; color: #111; background: #fff; }
+header, footer { padding: 16px; border-bottom: 1px solid #eee; }
+footer { border-top: 1px solid #eee; border-bottom: none; }
+main { max-width: 920px; margin: 0 auto; padding: 20px 16px; }
+a { color: inherit; }
+.nav { display: flex; gap: 12px; flex-wrap: wrap; }
+.brand { font-weight: 700; }
+.trust { font-size: 14px; color: #444; }
+.card { border: 1px solid #eee; border-radius: 12px; padding: 16px; }
+.tool-title { margin: 0 0 6px; }
+.tool-desc { margin: 0 0 14px; color: #444; }
+.hint { font-size: 13px; color: #555; }
