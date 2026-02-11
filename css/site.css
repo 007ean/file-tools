@@ -23,3 +23,4 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
 .dropzone:focus { outline: 3px solid #ddd; outline-offset: 4px; }
 .error { margin-top: 10px; padding: 10px; border: 1px solid #f2caca; background: #fff5f5; border-radius: 10px; color: #7a1f1f; }
 input[type="range"] { width: 100%; }
+select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 10px; background: #fff; }
