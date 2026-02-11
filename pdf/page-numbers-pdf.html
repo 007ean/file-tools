@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Add Page Numbers to PDF – No Upload</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="../css/site.css" />
+  <script defer src="../js/site.js"></script>
+
+  <!-- pdf-lib (CDN) -->
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+
+  <!-- Tool logic -->
+  <script defer src="../js/page-numbers-pdf.js"></script>
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <a class="brand" href="../index.html">File Tools</a>
+    <a href="../images/resize-image.html">Image</a>
+    <a href="../pdf/merge-pdf.html">PDF</a>
+    <a href="../utilities/remove-metadata.html">Utilities</a>
+  </div>
+  <p class="trust">Files never leave your device. No uploads. Works in your browser.</p>
+</header>
+
+<main>
+  <h1 class="tool-title">Add Page Numbers to PDF</h1>
+  <p class="tool-desc">Stamp page numbers onto a PDF — privately in your browser.</p>
+
+  <section class="card" id="tool">
+    <div class="grid">
+      <div>
+        <label class="label">1) Choose a PDF</label>
+        <div id="dropzone" class="dropzone" tabindex="0" role="button" aria-label="Drop a PDF here or click to select">
+          <strong>Drop a PDF here</strong>
+          <div class="hint">or click to select</div>
+          <input id="fileInput" type="file" accept="application/pdf" hidden />
+        </div>
+        <div id="fileInfo" class="hint" style="margin-top:8px;"></div>
+        <div id="pageInfo" class="hint" style="margin-top:6px;"></div>
+      </div>
+
+      <div>
+        <label class="label">2) Number settings</label>
+
+        <div class="box">
+          <label class="label" for="position">Position</label>
+          <select id="position">
+            <option value="bottom-right">Bottom Right</option>
+            <option value="bottom-center">Bottom Center</option>
+            <option value="bottom-left">Bottom Left</option>
+            <option value="top-right">Top Right</option>
+            <option value="top-center">Top Center</option>
+            <option value="top-left">Top Left</option>
+          </select>
+
+          <div class="row" style="margin-top:12px;">
+            <div style="flex:1;">
+              <label class="label" for="fontSize">Font size</label>
+              <input id="fontSize" type="number" min="6" max="72" value="12" />
+            </div>
+            <div style="flex:1;">
+              <label class="label" for="startAt">Start at</label>
+              <input id="startAt" type="number" min="1" value="1" />
+            </div>
+          </div>
+
+          <div class="row" style="margin-top:12px;">
+            <div style="flex:1;">
+              <label class="label" for="marginX">Margin X (pt)</label>
+              <input id="marginX" type="number" min="0" value="36" />
+              <div class="hint">36pt ≈ 0.5 inch</div>
+            </div>
+            <div style="flex:1;">
+              <label class="label" for="marginY">Margin Y (pt)</label>
+              <input id="marginY" type="number" min="0" value="36" />
+              <div class="hint">36pt ≈ 0.5 inch</div>
+            </div>
+          </div>
+
+          <label class="row" style="margin-top:12px;">
+            <input id="includeTotal" type="checkbox" checked />
+            Show "Page X of Y"
+          </label>
+
+          <div class="row" style="margin-top:12px;">
+            <button id="applyBtn" disabled>Add numbers</button>
+            <button id="downloadBtn" disabled>Download</button>
+            <button id="clearBtn" disabled>Clear</button>
+          </div>
+
+          <div id="status" class="hint" style="margin-top:10px;"></div>
+          <div id="error" class="error" style="display:none;"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="margin-top:16px">
+    <h2>How it works</h2>
+    <p class="hint">This tool writes the page numbers onto each page locally in your browser. Nothing is uploaded.</p>
+  </section>
+</main>
+
+<footer>
+  <div class="nav">
+    <a href="../privacy.html">Privacy</a>
+    <a href="../terms.html">Terms</a>
+    <a href="../about.html">About</a>
+  </div>
+</footer>
+
+</body>
+</html>
