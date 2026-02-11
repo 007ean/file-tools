@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="../css/site.css" />
   <script defer src="../js/site.js"></script>
+  <script defer src="../js/compress-image.js"></script>
 </head>
 <body>
 
@@ -20,12 +21,65 @@
 </header>
 
 <main>
-  <h1 class="tool-title">Compress image</h1>
-  <p class="tool-desc">Compress image by pixels or percentage — privately in your browser.</p>
+  <h1 class="tool-title">Compress Image</h1>
+  <p class="tool-desc">Reduce file size by adjusting quality — privately in your browser.</p>
 
   <section class="card" id="tool">
-    <p class="hint">Tool UI goes here next (file picker + resize controls).</p>
-  </section>
+  <div class="grid">
+    <div>
+      <label class="label">1) Choose an image</label>
+      <div id="dropzone" class="dropzone" tabindex="0" role="button" aria-label="Drop an image here or click to select">
+        <strong>Drop image here</strong>
+        <div class="hint">or click to select (JPG / PNG / WebP)</div>
+        <input id="fileInput" type="file" accept="image/*" hidden />
+      </div>
+      <div id="fileInfo" class="hint" style="margin-top:8px;"></div>
+    </div>
+
+    <div>
+      <label class="label">2) Compression settings</label>
+
+      <div class="box">
+        <label class="label" for="quality">Quality</label>
+        <input id="quality" type="range" min="10" max="95" value="80" />
+        <div class="row" style="justify-content:space-between;">
+          <div class="hint">Lower = smaller file</div>
+          <div class="hint"><span id="qualityVal">80</span>%</div>
+        </div>
+
+        <label class="row" style="margin-top:10px;">
+          <input id="toJpeg" type="checkbox" checked />
+          Convert to JPG (best compression)
+        </label>
+        <div class="hint">If unchecked, output keeps PNG when possible (bigger files).</div>
+      </div>
+
+      <div class="row" style="margin-top:12px;">
+        <button id="compressBtn" disabled>Compress</button>
+        <button id="downloadBtn" disabled>Download</button>
+      </div>
+
+      <div id="status" class="hint" style="margin-top:10px;"></div>
+      <div id="error" class="error" style="display:none;"></div>
+    </div>
+  </div>
+
+  <hr style="margin:16px 0; border:none; border-top:1px solid #eee;" />
+
+  <div class="grid">
+    <div>
+      <label class="label">Original</label>
+      <img id="previewIn" alt="Original preview" style="max-width:100%; display:none;" />
+      <div id="metaIn" class="hint"></div>
+    </div>
+    <div>
+      <label class="label">Compressed</label>
+      <img id="previewOut" alt="Compressed preview" style="max-width:100%; display:none;" />
+      <div id="metaOut" class="hint"></div>
+    </div>
+  </div>
+</section>
+
 
   <section style="margin-top:16px">
     <h2>How it works</h2>
