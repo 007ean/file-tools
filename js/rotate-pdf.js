@@ -1,0 +1,285 @@
+(() => {
+  const dropzone = document.getElementById("dropzone");
+  const fileInput = document.getElementById("fileInput");
+  const fileInfo = document.getElementById("fileInfo");
+  const pageInfo = document.getElementById("pageInfo");
+
+  const scope = document.getElementById("scope");
+  const rangesBox = document.getElementById("rangesBox");
+  const rangesInput = document.getElementById("ranges");
+  const angle = document.getElementById("angle");
+
+  const rotateBtn = document.getElementById("rotateBtn");
+  const downloadBtn = document.getElementById("downloadBtn");
+  const clearBtn = document.getElementById("clearBtn");
+
+  const statusEl = document.getElementById("status");
+  const errorEl = document.getElementById("error");
+
+  let pdfFile = null;
+  let pdfBytes = null;
+  let pageCount = 0;
+
+  let outputBlob = null;
+  let outputUrl = null;
+
+  function setError(msg) {
+    if (!msg) {
+      errorEl.style.display = "none";
+      errorEl.textContent = "";
+      return;
+    }
+    errorEl.style.display = "block";
+    errorEl.textContent = msg;
+  }
+
+  function setStatus(msg) {
+    statusEl.textContent = msg || "";
+  }
+
+  function humanBytes(bytes) {
+    if (!Number.isFinite(bytes)) return "";
+    const units = ["B", "KB", "MB", "GB"];
+    let i = 0;
+    let n = bytes;
+    while (n >= 1024 && i < units.length - 1) {
+      n /= 1024;
+      i++;
+    }
+    return `${n.toFixed(i === 0 ? 0 : 2)} ${units[i]}`;
+  }
+
+  function resetOutput() {
+    outputBlob = null;
+    if (outputUrl) URL.revokeObjectURL(outputUrl);
+    outputUrl = null;
+    downloadBtn.disabled = true;
+  }
+
+  function resetAll() {
+    setError("");
+    setStatus("");
+    resetOutput();
+
+    pdfFile = null;
+    pdfBytes = null;
+    pageCount = 0;
+
+    fileInfo.textContent = "";
+    pageInfo.textContent = "";
+    rangesInput.value = "";
+    scope.value = "all";
+    rangesBox.style.display = "none";
+    angle.value = "90";
+
+    rotateBtn.disabled = true;
+    clearBtn.disabled = true;
+  }
+
+  // Parse "1-3,5,8-10" into sorted unique 0-based indices
+  function parseRanges(input, maxPages) {
+    const raw = String(input || "").trim();
+    if (!raw) return { error: "Enter page ranges, e.g. 1-3,5,8-10." };
+
+    const parts = raw.split(",").map(s => s.trim()).filter(Boolean);
+    if (parts.length === 0) return { error: "Enter page ranges, e.g. 1-3,5,8-10." };
+
+    const indices = new Set();
+
+    for (const part of parts) {
+      if (/^\d+$/.test(part)) {
+        const p = Number(part);
+        if (!Number.isFinite(p) || p < 1 || p > maxPages) {
+          return { error: `Page ${part} is out of range (1-${maxPages}).` };
+        }
+        indices.add(p - 1);
+        continue;
+      }
+
+      const m = part.match(/^(\d+)\s*-\s*(\d+)$/);
+      if (m) {
+        let a = Number(m[1]);
+        let b = Number(m[2]);
+        if (!Number.isFinite(a) || !Number.isFinite(b)) return { error: `Invalid range: ${part}` };
+        if (a < 1 || b < 1 || a > maxPages || b > maxPages) {
+          return { error: `Range ${part} is out of range (1-${maxPages}).` };
+        }
+        if (b < a) [a, b] = [b, a];
+        for (let p = a; p <= b; p++) indices.add(p - 1);
+        continue;
+      }
+
+      return { error: `Invalid token: "${part}". Use formats like 2 or 2-5, separated by commas.` };
+    }
+
+    const out = Array.from(indices).sort((x, y) => x - y);
+    if (out.length === 0) return { error: "No pages selected." };
+    return { pages: out };
+  }
+
+  async function loadPdf(file) {
+    setError("");
+    setStatus("");
+    resetOutput();
+
+    if (!file) return;
+
+    const isPdf = file.type === "application/pdf" || String(file.name || "").toLowerCase().endsWith(".pdf");
+    if (!isPdf) {
+      setError("Please select a PDF file.");
+      return;
+    }
+
+    if (typeof PDFLib === "undefined" || !PDFLib.PDFDocument) {
+      setError("PDF library failed to load. Refresh the page and try again.");
+      return;
+    }
+
+    pdfFile = file;
+    fileInfo.textContent = `${file.name} • ${humanBytes(file.size)}`;
+
+    setStatus("Reading PDF…");
+    try {
+      pdfBytes = await file.arrayBuffer();
+      const doc = await PDFLib.PDFDocument.load(pdfBytes);
+      pageCount = doc.getPageCount();
+
+      pageInfo.textContent = `Pages: ${pageCount}`;
+      rotateBtn.disabled = false;
+      clearBtn.disabled = false;
+      setStatus("Ready.");
+    } catch (e) {
+      console.error(e);
+      setError("Failed to read PDF. It may be password-protected or corrupted.");
+      setStatus("");
+      resetAll();
+    }
+  }
+
+  async function rotatePdf() {
+    setError("");
+    setStatus("");
+    resetOutput();
+
+    if (!pdfBytes || !pageCount) {
+      setError("Please select a PDF first.");
+      return;
+    }
+
+    const deg = Number(angle.value);
+    if (![90, 180, 270].includes(deg)) {
+      setError("Invalid rotation angle.");
+      return;
+    }
+
+    let targets = null;
+    if (scope.value === "all") {
+      targets = Array.from({ length: pageCount }, (_, i) => i);
+    } else {
+      const parsed = parseRanges(rangesInput.value, pageCount);
+      if (parsed.error) {
+        setError(parsed.error);
+        return;
+      }
+      targets = parsed.pages;
+    }
+
+    setStatus(`Rotating ${targets.length} page(s)…`);
+
+    try {
+      const doc = await PDFLib.PDFDocument.load(pdfBytes);
+      const pages = doc.getPages();
+
+      // Rotate pages by adding to existing rotation
+      for (const idx of targets) {
+        const p = pages[idx];
+        const current = p.getRotation().angle || 0;
+        const next = (current + deg) % 360;
+        p.setRotation(PDFLib.degrees(next));
+      }
+
+      setStatus("Saving…");
+      const outBytes = await doc.save();
+
+      outputBlob = new Blob([outBytes], { type: "application/pdf" });
+      outputUrl = URL.createObjectURL(outputBlob);
+
+      downloadBtn.disabled = false;
+      setStatus("Done.");
+    } catch (e) {
+      console.error(e);
+      setError("Failed to rotate PDF. The PDF may be encrypted or malformed.");
+      setStatus("");
+    }
+  }
+
+  function downloadOutput() {
+    setError("");
+    if (!outputUrl || !outputBlob) {
+      setError("Nothing to download yet.");
+      return;
+    }
+
+    const baseName = (pdfFile?.name || "document").replace(/\.pdf$/i, "");
+    const filename = `${baseName}-rotated-${Date.now()}.pdf`;
+
+    const a = document.createElement("a");
+    a.href = outputUrl;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
+
+  function wireDropzone() {
+    dropzone.addEventListener("click", () => fileInput.click());
+    dropzone.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        fileInput.click();
+      }
+    });
+
+    fileInput.addEventListener("change", () => {
+      const picked = fileInput.files && fileInput.files[0];
+      if (picked) loadPdf(picked);
+      fileInput.value = "";
+    });
+
+    ["dragenter", "dragover"].forEach((evt) => {
+      dropzone.addEventListener(evt, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropzone.style.borderColor = "#bbb";
+      });
+    });
+
+    ["dragleave", "drop"].forEach((evt) => {
+      dropzone.addEventListener(evt, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropzone.style.borderColor = "#ddd";
+      });
+    });
+
+    dropzone.addEventListener("drop", (e) => {
+      const dropped = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+      if (dropped) loadPdf(dropped);
+    });
+  }
+
+  // UI wiring
+  scope.addEventListener("change", () => {
+    rangesBox.style.display = (scope.value === "ranges") ? "" : "none";
+    resetOutput();
+  });
+  rangesInput.addEventListener("input", () => resetOutput());
+  angle.addEventListener("change", () => resetOutput());
+
+  rotateBtn.addEventListener("click", rotatePdf);
+  downloadBtn.addEventListener("click", downloadOutput);
+  clearBtn.addEventListener("click", resetAll);
+
+  wireDropzone();
+  resetAll();
+})();
