@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Remove Image Metadata (EXIF) – No Upload</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="../css/site.css" />
+  <script defer src="../js/site.js"></script>
+  <script defer src="../js/remove-metadata.js"></script>
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <a class="brand" href="../index.html">File Tools</a>
+    <a href="../images/resize-image.html">Image</a>
+    <a href="../pdf/">PDF</a>
+    <a href="../utilities/remove-metadata.html">Utilities</a>
+  </div>
+  <p class="trust">Files never leave your device. No uploads. Works in your browser.</p>
+</header>
+
+<main>
+  <h1 class="tool-title">Remove Image Metadata (EXIF)</h1>
+  <p class="tool-desc">Strip location and camera metadata by re-exporting the image in your browser.</p>
+
+  <section class="card" id="tool">
+    <div class="grid">
+      <div>
+        <label class="label">1) Choose an image</label>
+        <div id="dropzone" class="dropzone" tabindex="0" role="button" aria-label="Drop an image here or click to select">
+          <strong>Drop image here</strong>
+          <div class="hint">or click to select (JPG / PNG / WebP)</div>
+          <input id="fileInput" type="file" accept="image/*" hidden />
+        </div>
+        <div id="fileInfo" class="hint" style="margin-top:8px;"></div>
+      </div>
+
+      <div>
+        <label class="label">2) Output settings</label>
+
+        <div class="box">
+          <label class="label" for="format">Output format</label>
+          <select id="format">
+            <option value="keep">Keep original format</option>
+            <option value="image/jpeg">JPG</option>
+            <option value="image/png">PNG</option>
+            <option value="image/webp">WebP</option>
+          </select>
+
+          <div id="qualityBox" style="margin-top:12px;">
+            <label class="label" for="quality">Quality (JPG/WebP)</label>
+            <input id="quality" type="range" min="10" max="95" value="92" />
+            <div class="row" style="justify-content:space-between;">
+              <div class="hint">Lower = smaller file</div>
+              <div class="hint"><span id="qualityVal">92</span>%</div>
+            </div>
+          </div>
+
+          <div class="hint" style="margin-top:10px;">
+            Note: This removes metadata by re-exporting the image. Some formats may change file size.
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:12px;">
+          <button id="processBtn" disabled>Remove metadata</button>
+          <button id="downloadBtn" disabled>Download</button>
+        </div>
+
+        <div id="status" class="hint" style="margin-top:10px;"></div>
+        <div id="error" class="error" style="display:none;"></div>
+      </div>
+    </div>
+
+    <hr style="margin:16px 0; border:none; border-top:1px solid #eee;" />
+
+    <div class="grid">
+      <div>
+        <label class="label">Original</label>
+        <img id="previewIn" alt="Original preview" style="max-width:100%; display:none;" />
+        <div id="metaIn" class="hint"></div>
+      </div>
+      <div>
+        <label class="label">Clean output</label>
+        <img id="previewOut" alt="Clean preview" style="max-width:100%; display:none;" />
+        <div id="metaOut" class="hint"></div>
+      </div>
+    </div>
+  </section>
+
+  <section style="margin-top:16px">
+    <h2>What metadata gets removed?</h2>
+    <p class="hint">
+      Many images include EXIF data like GPS location, device model, and timestamps.
+      This tool re-exports your image in the browser so that metadata is not carried over.
+    </p>
+  </section>
+</main>
+
+<footer>
+  <div class="nav">
+    <a href="../privacy.html">Privacy</a>
+    <a href="../terms.html">Terms</a>
+    <a href="../about.html">About</a>
+  </div>
+</footer>
+
+</body>
+</html>
