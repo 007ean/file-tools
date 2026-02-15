@@ -1,0 +1,100 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Image to PDF | Free Online File Tool</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Use Image to PDF online for free. Process files locally in your browser with no uploads or tracking." />
+  <link rel="stylesheet" href="../css/site.css" />
+  <script defer src="../js/site.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+  <script defer src="../js/image-to-pdf.js"></script>
+</head>
+<body>
+<header>
+  <div class="nav">
+    <a class="brand" href="../index.html">File Tools</a>
+    <a href="../images/index.html">Image</a>
+    <a href="../pdf/index.html">PDF</a>
+    <a href="../utilities/index.html">Utilities</a>
+  </div>
+  <p class="trust">Files never leave your device. No uploads. Works in your browser.</p>
+</header>
+
+<main>
+  <h1 class="tool-title">Image to PDF</h1>
+  <p class="tool-desc">Convert one image or combine multiple images into one PDF.</p>
+
+  <section class="card">
+    <div class="grid">
+      <div>
+        <label class="label">1) Choose image files</label>
+        <div id="dropzone" class="dropzone" tabindex="0" role="button" aria-label="Drop image files here or click to select">
+          <strong>Drop images here</strong>
+          <div class="hint">or click to select (JPG / PNG / WebP, multiple allowed)</div>
+          <input id="fileInput" type="file" accept="image/*" multiple hidden />
+        </div>
+        <div id="fileInfo" class="hint" style="margin-top:8px;"></div>
+      </div>
+      <div>
+        <label class="label">2) PDF settings</label>
+        <div class="box">
+          <label class="label" for="fit">Image fit</label>
+          <select id="fit">
+            <option value="contain">Contain (keep full image)</option>
+            <option value="cover">Cover (fill page)</option>
+          </select>
+          <label class="label" for="pageSize" style="margin-top:10px;">Page size</label>
+          <select id="pageSize">
+            <option value="match">Fit to image</option>
+            <option value="a4">A4</option>
+            <option value="letter">US Letter</option>
+          </select>
+          <label class="label" for="orientation" style="margin-top:10px;">Orientation</label>
+          <select id="orientation">
+            <option value="auto">Auto</option>
+            <option value="portrait">Portrait</option>
+            <option value="landscape">Landscape</option>
+          </select>
+          <div class="row" style="margin-top:12px;">
+            <button id="createBtn" disabled>Create PDF</button>
+            <button id="downloadBtn" disabled>Download</button>
+            <button id="clearBtn" disabled>Clear</button>
+          </div>
+          <div id="status" class="hint" style="margin-top:10px;"></div>
+          <div id="error" class="error" style="display:none;"></div>
+        </div>
+      </div>
+    </div>
+
+    <hr style="margin:16px 0; border:none; border-top:1px solid #eee;" />
+    <div>
+      <label class="label">Images in PDF (drag to reorder)</label>
+      <div id="list" class="list"></div>
+    </div>
+  </section>
+  <!-- SEO Blocks Start -->
+  <section class="card seo-block"><h2>How to Use</h2><ol><li>Add your file(s) to the tool.</li><li>Choose your settings and run the process.</li><li>Download the result to your device.</li></ol></section>
+  <section class="card seo-block"><h2>FAQ</h2><p><strong>Is Image to PDF private?</strong><br />Yes. Processing runs locally in your browser and files are not uploaded.</p><p><strong>Can I use this tool for free?</strong><br />Yes. This tool is free to use with no account required.</p></section>
+  <section class="card seo-block"><h2>Related Image Tools</h2><ul>
+      <li><a href="../images/pad-image.html">Add Border / Pad Image to Aspect Ratio</a></li>
+      <li><a href="../images/compress-image.html">Compress Image (Batch)</a></li>
+      <li><a href="../images/convert-image.html">Convert Image (Batch)</a></li>
+      <li><a href="../images/crop-image.html">Crop Image</a></li>
+    </ul></section>
+  <script type="application/ld+json">{"@context":"https://schema.org","mainEntity":[{"acceptedAnswer":{"text":"Yes. Processing runs locally in your browser and files are not uploaded.","@type":"Answer"},"name":"Is Image to PDF private?","@type":"Question"},{"acceptedAnswer":{"text":"Yes. This tool is free to use with no account required.","@type":"Answer"},"name":"Can I use this tool for free?","@type":"Question"}],"@type":"FAQPage"}</script>
+  <script type="application/ld+json">{"name":"Image to PDF","applicationCategory":"UtilitiesApplication","@context":"https://schema.org","description":"Use Image to PDF online for free. Process files locally in your browser with no uploads or tracking.","operatingSystem":"Any","@type":"SoftwareApplication","offers":{"price":"0","priceCurrency":"USD","@type":"Offer"}}</script>
+  <!-- SEO Blocks End -->
+</main>
+
+<footer>
+  <div class="nav">
+    <a href="../privacy.html">Privacy</a>
+    <a href="../terms.html">Terms</a>
+    <a href="../about.html">About</a>
+  </div>
+</footer>
+</body>
+</html>
+
+

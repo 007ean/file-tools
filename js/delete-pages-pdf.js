@@ -12,6 +12,8 @@
 
   const statusEl = document.getElementById("status");
   const errorEl = document.getElementById("error");
+  const preview = window.FileTools?.createPdfPreview({ anchorEl: pageInfo, maxThumbs: 4 });
+  const settingsStore = window.FileTools?.bindToolSettings("delete-pages-pdf", ["ranges"]);
 
   let pdfFile = null;
   let pdfBytes = null;
@@ -53,7 +55,7 @@
     downloadBtn.disabled = true;
   }
 
-  function resetAll() {
+  function resetAll(resetSettings) {
     setError("");
     setStatus("");
     resetOutput();
@@ -64,10 +66,12 @@
 
     fileInfo.textContent = "";
     pageInfo.textContent = "";
-    rangesInput.value = "";
+    if (resetSettings && settingsStore) settingsStore.reset();
+    rangesInput.value = rangesInput.value || "";
 
     deleteBtn.disabled = true;
     clearBtn.disabled = true;
+    if (preview) preview.clear();
   }
 
   // Parse "2,4-6" into sorted unique 0-based indices
@@ -120,7 +124,7 @@
 
     const isPdf = file.type === "application/pdf" || String(file.name || "").toLowerCase().endsWith(".pdf");
     if (!isPdf) {
-      setError("Please select a PDF file.");
+      setError(window.FileTools?.describeFileTypeError(file, "PDF file") || "Please select a PDF file.");
       return;
     }
 
@@ -139,14 +143,15 @@
       pageCount = doc.getPageCount();
 
       pageInfo.textContent = `Pages: ${pageCount}`;
+      if (preview) preview.renderFromBytes(new Uint8Array(pdfBytes), pageCount);
       deleteBtn.disabled = false;
       clearBtn.disabled = false;
       setStatus("Ready.");
     } catch (e) {
       console.error(e);
-      setError("Failed to read PDF. It may be password-protected or corrupted.");
+      setError(window.FileTools?.describePdfError(e, "read this PDF") || "Failed to read PDF.");
       setStatus("");
-      resetAll();
+      resetAll(false);
     }
   }
 
@@ -196,7 +201,7 @@
       setStatus("Done.");
     } catch (e) {
       console.error(e);
-      setError("Failed to delete pages. The PDF may be encrypted or malformed.");
+      setError(window.FileTools?.describePdfError(e, "delete pages") || "Failed to delete pages.");
       setStatus("");
     }
   }
@@ -209,8 +214,12 @@
     }
 
     const baseName = (pdfFile?.name || "document").replace(/\.pdf$/i, "");
-    const filename = `${baseName}-deleted-pages-${Date.now()}.pdf`;
-
+    const filename = window.FileTools?.makeDownloadName(baseName, "deleted-pages", "pdf")
+      || `${baseName}-deleted-pages.pdf`;
+    if (window.FileTools?.triggerBlobDownload) {
+      window.FileTools.triggerBlobDownload(outputBlob, filename);
+      return;
+    }
     const a = document.createElement("a");
     a.href = outputUrl;
     a.download = filename;
@@ -259,8 +268,8 @@
   rangesInput.addEventListener("input", () => resetOutput());
   deleteBtn.addEventListener("click", deletePages);
   downloadBtn.addEventListener("click", downloadOutput);
-  clearBtn.addEventListener("click", resetAll);
+  clearBtn.addEventListener("click", () => resetAll(true));
 
   wireDropzone();
-  resetAll();
+  resetAll(false);
 })();

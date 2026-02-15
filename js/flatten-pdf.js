@@ -1,0 +1,129 @@
+(() => {
+  const dropzone = document.getElementById("dropzone");
+  const fileInput = document.getElementById("fileInput");
+  const fileInfo = document.getElementById("fileInfo");
+  const processBtn = document.getElementById("processBtn");
+  const downloadBtn = document.getElementById("downloadBtn");
+  const clearBtn = document.getElementById("clearBtn");
+  const statusEl = document.getElementById("status");
+  const errorEl = document.getElementById("error");
+
+  let file = null;
+  let bytes = null;
+  let outBlob = null;
+
+  function setError(msg) { errorEl.style.display = msg ? "block" : "none"; errorEl.textContent = msg || ""; }
+  function setStatus(msg) { statusEl.textContent = msg || ""; }
+
+  function clearOutput() {
+    outBlob = null;
+    downloadBtn.disabled = true;
+  }
+
+  async function loadPdf(picked) {
+    setError("");
+    setStatus("");
+    clearOutput();
+
+    const isPdf = picked && ((picked.type === "application/pdf") || /\.pdf$/i.test(picked.name || ""));
+    if (!isPdf) {
+      setError("Please choose a PDF file.");
+      return;
+    }
+
+    file = picked;
+    bytes = await picked.arrayBuffer();
+    fileInfo.textContent = `${picked.name} - ${Math.round((picked.size || 0) / 1024)} KB`;
+    processBtn.disabled = false;
+    clearBtn.disabled = false;
+    setStatus("Ready.");
+  }
+
+  async function flattenPdf() {
+    setError("");
+    setStatus("Flattening...");
+    clearOutput();
+
+    if (!bytes) {
+      setError("Choose a PDF first.");
+      setStatus("");
+      return;
+    }
+
+    try {
+      const doc = await PDFLib.PDFDocument.load(bytes, { updateMetadata: false });
+
+      try {
+        const form = doc.getForm();
+        form.flatten();
+      } catch {
+        // No form fields.
+      }
+
+      const pages = doc.getPages();
+      for (const p of pages) {
+        const annots = p.node.lookup(PDFLib.PDFName.of("Annots"));
+        if (annots) {
+          p.node.delete(PDFLib.PDFName.of("Annots"));
+        }
+      }
+
+      const out = await doc.save();
+      outBlob = new Blob([out], { type: "application/pdf" });
+      downloadBtn.disabled = false;
+      setStatus("Done.");
+    } catch (e) {
+      console.error(e);
+      setError(window.FileTools?.describePdfError(e, "flatten this PDF") || "Failed to flatten PDF.");
+      setStatus("");
+    }
+  }
+
+  function downloadOutput() {
+    if (!outBlob) {
+      setError("Nothing to download yet.");
+      return;
+    }
+    const base = window.FileTools?.toSafeBaseName(file?.name || "document") || "document";
+    const name = window.FileTools?.makeDownloadName(base, "flattened", "pdf") || `${base}-flattened.pdf`;
+    window.FileTools?.triggerBlobDownload(outBlob, name);
+  }
+
+  function clearAll() {
+    setError("");
+    setStatus("");
+    file = null;
+    bytes = null;
+    fileInfo.textContent = "";
+    processBtn.disabled = true;
+    clearBtn.disabled = true;
+    clearOutput();
+  }
+
+  function wireDropzone() {
+    dropzone.addEventListener("click", () => fileInput.click());
+    dropzone.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fileInput.click(); }
+    });
+    fileInput.addEventListener("change", () => {
+      const picked = fileInput.files?.[0];
+      if (picked) loadPdf(picked);
+      fileInput.value = "";
+    });
+    ["dragenter", "dragover"].forEach((evt) => {
+      dropzone.addEventListener(evt, (e) => { e.preventDefault(); e.stopPropagation(); dropzone.style.borderColor = "#bbb"; });
+    });
+    ["dragleave", "drop"].forEach((evt) => {
+      dropzone.addEventListener(evt, (e) => { e.preventDefault(); e.stopPropagation(); dropzone.style.borderColor = "#ddd"; });
+    });
+    dropzone.addEventListener("drop", (e) => {
+      const picked = e.dataTransfer?.files?.[0];
+      if (picked) loadPdf(picked);
+    });
+  }
+
+  processBtn.addEventListener("click", flattenPdf);
+  downloadBtn.addEventListener("click", downloadOutput);
+  clearBtn.addEventListener("click", clearAll);
+  wireDropzone();
+})();

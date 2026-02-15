@@ -18,6 +18,11 @@
 
   const statusEl = document.getElementById("status");
   const errorEl = document.getElementById("error");
+  const preview = window.FileTools?.createPdfPreview({ anchorEl: pageInfo, maxThumbs: 4 });
+  const settingsStore = window.FileTools?.bindToolSettings(
+    "watermark-pdf",
+    ["text", "fontSize", "opacity", "angle", "position", "marginX", "marginY"],
+  );
 
   let pdfFile = null;
   let pdfBytes = null;
@@ -59,7 +64,7 @@
     downloadBtn.disabled = true;
   }
 
-  function resetAll() {
+  function resetAll(resetSettings) {
     setError("");
     setStatus("");
     resetOutput();
@@ -71,8 +76,10 @@
     fileInfo.textContent = "";
     pageInfo.textContent = "";
 
+    if (resetSettings && settingsStore) settingsStore.reset();
     applyBtn.disabled = true;
     clearBtn.disabled = true;
+    if (preview) preview.clear();
   }
 
   function clampInt(val, min, max, fallback) {
@@ -117,7 +124,7 @@
 
     const isPdf = file.type === "application/pdf" || String(file.name || "").toLowerCase().endsWith(".pdf");
     if (!isPdf) {
-      setError("Please select a PDF file.");
+      setError(window.FileTools?.describeFileTypeError(file, "PDF file") || "Please select a PDF file.");
       return;
     }
 
@@ -136,14 +143,15 @@
       pageCount = doc.getPageCount();
 
       pageInfo.textContent = `Pages: ${pageCount}`;
+      if (preview) preview.renderFromBytes(new Uint8Array(pdfBytes), pageCount);
       applyBtn.disabled = false;
       clearBtn.disabled = false;
       setStatus("Ready.");
     } catch (e) {
       console.error(e);
-      setError("Failed to read PDF. It may be password-protected or corrupted.");
+      setError(window.FileTools?.describePdfError(e, "read this PDF") || "Failed to read PDF.");
       setStatus("");
-      resetAll();
+      resetAll(false);
     }
   }
 
@@ -210,7 +218,7 @@
       setStatus("Done.");
     } catch (e) {
       console.error(e);
-      setError("Failed to watermark PDF. The PDF may be encrypted or malformed.");
+      setError(window.FileTools?.describePdfError(e, "add watermark") || "Failed to watermark PDF.");
       setStatus("");
     }
   }
@@ -223,8 +231,12 @@
     }
 
     const baseName = (pdfFile?.name || "document").replace(/\.pdf$/i, "");
-    const filename = `${baseName}-watermarked-${Date.now()}.pdf`;
-
+    const filename = window.FileTools?.makeDownloadName(baseName, "watermarked", "pdf")
+      || `${baseName}-watermarked.pdf`;
+    if (window.FileTools?.triggerBlobDownload) {
+      window.FileTools.triggerBlobDownload(outputBlob, filename);
+      return;
+    }
     const a = document.createElement("a");
     a.href = outputUrl;
     a.download = filename;
@@ -278,8 +290,8 @@
 
   applyBtn.addEventListener("click", applyWatermark);
   downloadBtn.addEventListener("click", downloadOutput);
-  clearBtn.addEventListener("click", resetAll);
+  clearBtn.addEventListener("click", () => resetAll(true));
 
   wireDropzone();
-  resetAll();
+  resetAll(false);
 })();

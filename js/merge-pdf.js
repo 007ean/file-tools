@@ -76,6 +76,10 @@
       const left = document.createElement("div");
       left.className = "item-left";
 
+      const previewHost = document.createElement("div");
+      previewHost.className = "thumb";
+      previewHost.innerHTML = `<div class="hint">Preview...</div>`;
+
       const name = document.createElement("div");
       name.className = "item-name";
       name.textContent = file.name || `PDF ${idx + 1}`;
@@ -86,6 +90,7 @@
 
       left.appendChild(name);
       left.appendChild(meta);
+      left.appendChild(previewHost);
 
       const actions = document.createElement("div");
       actions.className = "item-actions";
@@ -128,9 +133,35 @@
       row.appendChild(actions);
 
       listEl.appendChild(row);
+      renderPreview(file, previewHost);
     });
 
     updateButtons();
+  }
+
+  async function renderPreview(file, hostEl) {
+    if (!hostEl) return;
+    try {
+      if (!window.FileTools?.ensurePdfJs) {
+        hostEl.innerHTML = `<div class="hint">Preview unavailable.</div>`;
+        return;
+      }
+      await window.FileTools.ensurePdfJs();
+      const bytes = new Uint8Array(await file.arrayBuffer());
+      const task = window.pdfjsLib.getDocument({ data: bytes });
+      const pdf = await task.promise;
+      const page = await pdf.getPage(1);
+      const viewport = page.getViewport({ scale: 0.2 });
+      const canvas = document.createElement("canvas");
+      canvas.className = "pdf-thumb-canvas";
+      canvas.width = Math.floor(viewport.width);
+      canvas.height = Math.floor(viewport.height);
+      await page.render({ canvasContext: canvas.getContext("2d"), viewport }).promise;
+      hostEl.innerHTML = "";
+      hostEl.appendChild(canvas);
+    } catch {
+      hostEl.innerHTML = `<div class="hint">Preview unavailable.</div>`;
+    }
   }
 
   function addFiles(newFiles) {
@@ -142,7 +173,7 @@
     const pdfs = incoming.filter(f => (f.type === "application/pdf") || (String(f.name || "").toLowerCase().endsWith(".pdf")));
 
     if (pdfs.length === 0) {
-      setError("Please add PDF files only.");
+      setError(window.FileTools?.describeFileTypeError(incoming[0], "PDF file") || "Please add PDF files only.");
       return;
     }
 
@@ -192,7 +223,7 @@
       setStatus("Done.");
     } catch (e) {
       console.error(e);
-      setError("Failed to merge PDFs. One of the files may be encrypted or corrupted.");
+      setError(window.FileTools?.describePdfError(e, "merge PDFs") || "Failed to merge PDFs.");
       setStatus("");
     }
   }
@@ -204,7 +235,11 @@
       return;
     }
 
-    const filename = `merged-${Date.now()}.pdf`;
+    const filename = window.FileTools?.makeDownloadName("merged-pdf", "output", "pdf") || "merged-pdf-output.pdf";
+    if (window.FileTools?.triggerBlobDownload) {
+      window.FileTools.triggerBlobDownload(outputBlob, filename);
+      return;
+    }
     const a = document.createElement("a");
     a.href = outputUrl;
     a.download = filename;

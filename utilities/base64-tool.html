@@ -1,0 +1,85 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Base64 Encode / Decode (Text + File) | Free Online File Tool</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Use Base64 Encode / Decode (Text + File) online for free. Process files locally in your browser with no uploads or tracking." />
+  <link rel="stylesheet" href="../css/site.css" />
+  <script defer src="../js/site.js"></script>
+  <script defer src="../js/base64-tool.js"></script>
+</head>
+<body>
+<header>
+  <div class="nav">
+    <a class="brand" href="../index.html">File Tools</a>
+    <a href="../images/index.html">Image</a>
+    <a href="../pdf/index.html">PDF</a>
+    <a href="../utilities/index.html">Utilities</a>
+  </div>
+  <p class="trust">Files never leave your device. No uploads. Works in your browser.</p>
+</header>
+<main>
+  <h1 class="tool-title">Base64 Encode / Decode (Text + File)</h1>
+  <section class="card">
+    <div class="grid">
+      <div>
+        <label class="label" for="textInput">Text / Base64 Input</label>
+        <textarea id="textInput" rows="10" style="width:100%;"></textarea>
+        <div class="row" style="margin-top:10px;">
+          <button id="encodeTextBtn">Encode Text</button>
+          <button id="decodeTextBtn">Decode Base64</button>
+          <button id="copyTextBtn" disabled>Copy Output</button>
+        </div>
+        <label class="label" for="textOutput" style="margin-top:10px;">Output</label>
+        <textarea id="textOutput" rows="10" style="width:100%;" readonly></textarea>
+      </div>
+      <div>
+        <label class="label">File encode/decode</label>
+        <div class="box">
+          <div id="dropzone" class="dropzone" tabindex="0" role="button" aria-label="Drop file here or click to select">
+            <strong>Drop file here</strong>
+            <div class="hint">or click to select for Base64 encode</div>
+            <input id="fileInput" type="file" hidden />
+          </div>
+          <div id="fileInfo" class="hint" style="margin-top:8px;"></div>
+          <div class="row" style="margin-top:10px;">
+            <button id="encodeFileBtn" disabled>Encode File</button>
+            <button id="copyFileB64Btn" disabled>Copy Base64</button>
+          </div>
+
+          <label class="label" for="decodeName" style="margin-top:10px;">Decode Base64 to file</label>
+          <input id="decodeName" type="text" value="decoded.bin" />
+          <label class="label" for="decodeType" style="margin-top:8px;">MIME type (optional)</label>
+          <input id="decodeType" type="text" value="application/octet-stream" />
+          <button id="decodeFileBtn" style="margin-top:10px;">Decode Base64 -> Download File</button>
+        </div>
+      </div>
+    </div>
+    <div id="status" class="hint" style="margin-top:10px;"></div>
+    <div id="error" class="error" style="display:none;"></div>
+  </section>
+  <!-- SEO Blocks Start -->
+  <section class="card seo-block"><h2>How to Use</h2><ol><li>Add your file(s) to the tool.</li><li>Choose your settings and run the process.</li><li>Download the result to your device.</li></ol></section>
+  <section class="card seo-block"><h2>FAQ</h2><p><strong>Is Base64 Encode / Decode (Text + File) private?</strong><br />Yes. Processing runs locally in your browser and files are not uploaded.</p><p><strong>Can I use this tool for free?</strong><br />Yes. This tool is free to use with no account required.</p></section>
+  <section class="card seo-block"><h2>Related Utilities</h2><ul>
+      <li><a href="../utilities/file-hash.html">File Hash Generator</a></li>
+      <li><a href="../utilities/json-formatter.html">JSON Formatter / Validator</a></li>
+      <li><a href="../utilities/qr-generator.html">QR Code Generator (PNG + SVG)</a></li>
+      <li><a href="../utilities/remove-metadata.html">Remove Image Metadata (EXIF)</a></li>
+    </ul></section>
+  <script type="application/ld+json">{"@context":"https://schema.org","mainEntity":[{"acceptedAnswer":{"text":"Yes. Processing runs locally in your browser and files are not uploaded.","@type":"Answer"},"name":"Is Base64 Encode / Decode (Text + File) private?","@type":"Question"},{"acceptedAnswer":{"text":"Yes. This tool is free to use with no account required.","@type":"Answer"},"name":"Can I use this tool for free?","@type":"Question"}],"@type":"FAQPage"}</script>
+  <script type="application/ld+json">{"name":"Base64 Encode / Decode (Text + File)","applicationCategory":"UtilitiesApplication","@context":"https://schema.org","description":"Use Base64 Encode / Decode (Text + File) online for free. Process files locally in your browser with no uploads or tracking.","operatingSystem":"Any","@type":"SoftwareApplication","offers":{"price":"0","priceCurrency":"USD","@type":"Offer"}}</script>
+  <!-- SEO Blocks End -->
+</main>
+<footer>
+  <div class="nav">
+    <a href="../privacy.html">Privacy</a>
+    <a href="../terms.html">Terms</a>
+    <a href="../about.html">About</a>
+  </div>
+</footer>
+</body>
+</html>
+
+

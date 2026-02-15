@@ -2,30 +2,27 @@
   const dropzone = document.getElementById("dropzone");
   const fileInput = document.getElementById("fileInput");
   const fileInfo = document.getElementById("fileInfo");
-
   const format = document.getElementById("format");
   const qualityBox = document.getElementById("qualityBox");
   const quality = document.getElementById("quality");
   const qualityVal = document.getElementById("qualityVal");
   const transparentBg = document.getElementById("transparentBg");
-
   const convertBtn = document.getElementById("convertBtn");
-  const downloadBtn = document.getElementById("downloadBtn");
-
+  const zipBtn = document.getElementById("zipBtn");
+  const clearBtn = document.getElementById("clearBtn");
+  const progressBar = document.getElementById("progressBar");
   const statusEl = document.getElementById("status");
   const errorEl = document.getElementById("error");
-
   const previewIn = document.getElementById("previewIn");
   const previewOut = document.getElementById("previewOut");
   const metaIn = document.getElementById("metaIn");
   const metaOut = document.getElementById("metaOut");
+  const downloadsEl = document.getElementById("downloads");
 
-  let originalFile = null;
-  let originalImage = null;
-  let originalObjectURL = null;
+  const settingsStore = window.FileTools?.bindToolSettings("convert-image", ["format", "quality", "transparentBg"]);
 
-  let outputBlob = null;
-  let outputObjectURL = null;
+  let sourceFiles = [];
+  let activeUrls = [];
 
   function setError(msg) {
     if (!msg) {
@@ -36,187 +33,187 @@
     errorEl.style.display = "block";
     errorEl.textContent = msg;
   }
-
-  function setStatus(msg) {
-    statusEl.textContent = msg || "";
-  }
-
+  function setStatus(msg) { statusEl.textContent = msg || ""; }
   function humanBytes(bytes) {
     if (!Number.isFinite(bytes)) return "";
     const units = ["B", "KB", "MB", "GB"];
     let i = 0;
     let n = bytes;
-    while (n >= 1024 && i < units.length - 1) {
-      n /= 1024;
-      i++;
-    }
+    while (n >= 1024 && i < units.length - 1) { n /= 1024; i++; }
     return `${n.toFixed(i === 0 ? 0 : 2)} ${units[i]}`;
   }
-
-  function revokeURLs() {
-    if (originalObjectURL) URL.revokeObjectURL(originalObjectURL);
-    if (outputObjectURL) URL.revokeObjectURL(outputObjectURL);
-    originalObjectURL = null;
-    outputObjectURL = null;
+  function setProgress(current, total) {
+    if (!total) {
+      progressBar.hidden = true;
+      progressBar.value = 0;
+      return;
+    }
+    progressBar.hidden = false;
+    progressBar.value = Math.max(0, Math.min(100, Math.round((current / total) * 100)));
   }
-
+  function clearUrls() {
+    for (const url of activeUrls) URL.revokeObjectURL(url);
+    activeUrls = [];
+  }
   function resetOutput() {
-    outputBlob = null;
-    if (outputObjectURL) URL.revokeObjectURL(outputObjectURL);
-    outputObjectURL = null;
+    clearUrls();
+    downloadsEl.innerHTML = `<div class="hint">No exports yet.</div>`;
     previewOut.style.display = "none";
     previewOut.removeAttribute("src");
     metaOut.textContent = "";
-    downloadBtn.disabled = true;
+    zipBtn.disabled = true;
   }
-
-  function updateQualityUI() {
-    const outType = format.value;
-    const usesQuality = outType === "image/jpeg" || outType === "image/webp";
-    qualityBox.style.display = usesQuality ? "" : "none";
+  function resetAll(resetSettings) {
+    setError("");
+    setStatus("");
+    setProgress(0, 0);
+    if (resetSettings && settingsStore) settingsStore.reset();
+    sourceFiles = [];
+    fileInfo.textContent = "";
+    previewIn.style.display = "none";
+    previewIn.removeAttribute("src");
+    metaIn.textContent = "";
+    convertBtn.disabled = true;
+    clearBtn.disabled = true;
     resetOutput();
+    updateQualityUI();
   }
-
-  function getQuality() {
-    const q = Number(quality.value);
-    if (!Number.isFinite(q)) return 0.85;
-    return Math.min(0.95, Math.max(0.1, q / 100));
+  function updateQualityUI() {
+    const usesQuality = format.value === "image/jpeg" || format.value === "image/webp";
+    qualityBox.style.display = usesQuality ? "" : "none";
   }
-
-  async function loadFile(file) {
+  async function loadImage(file) {
+    const url = URL.createObjectURL(file);
+    try {
+      const img = new Image();
+      const loaded = new Promise((resolve, reject) => {
+        img.onload = () => resolve(true);
+        img.onerror = () => reject(new Error(`Could not read image: ${file.name}`));
+      });
+      img.src = url;
+      await loaded;
+      return img;
+    } finally {
+      URL.revokeObjectURL(url);
+    }
+  }
+  async function loadFiles(files) {
     setError("");
     setStatus("");
     resetOutput();
-
-    if (!file) return;
-    if (!file.type.startsWith("image/")) {
-      setError("Please select an image file (JPG/PNG/WebP).");
+    const list = Array.from(files || []).filter((f) => (f.type || "").startsWith("image/"));
+    if (!list.length) {
+      setError(window.FileTools?.describeFileTypeError(files?.[0], "image file") || "Please choose image files.");
       return;
     }
+    sourceFiles = list;
+    const totalBytes = list.reduce((sum, f) => sum + (f.size || 0), 0);
+    fileInfo.textContent = `${list.length} file(s) - ${humanBytes(totalBytes)}`;
 
-    revokeURLs();
-
-    originalFile = file;
-    fileInfo.textContent = `${file.name} • ${humanBytes(file.size)} • ${file.type || "unknown type"}`;
-
-    originalObjectURL = URL.createObjectURL(file);
-    previewIn.src = originalObjectURL;
+    const first = list[0];
+    const firstUrl = URL.createObjectURL(first);
+    previewIn.src = firstUrl;
     previewIn.style.display = "";
-
-    const img = new Image();
-    img.decoding = "async";
-
-    const loaded = new Promise((resolve, reject) => {
-      img.onload = () => resolve(true);
-      img.onerror = () => reject(new Error("Could not read this image."));
-    });
-
-    img.src = originalObjectURL;
-
-    try {
-      await loaded;
-    } catch (e) {
-      setError(e.message || "Could not read this image.");
-      return;
-    }
-
-    originalImage = img;
-    metaIn.textContent = `${img.naturalWidth} × ${img.naturalHeight} px • ${humanBytes(file.size)}`;
+    previewIn.onload = () => URL.revokeObjectURL(firstUrl);
+    const img = await loadImage(first);
+    metaIn.textContent = `${img.naturalWidth} x ${img.naturalHeight} px - ${humanBytes(first.size)}`;
 
     convertBtn.disabled = false;
+    clearBtn.disabled = false;
     setStatus("Ready.");
   }
-
-  async function convertImage() {
+  function addDownloadRow(label, blob, filename) {
+    const url = URL.createObjectURL(blob);
+    activeUrls.push(url);
+    const row = document.createElement("div");
+    row.className = "item";
+    row.innerHTML = `<div class="item-left"><div class="item-name">${label}</div><div class="item-meta">${humanBytes(blob.size)} - ${blob.type}</div></div>`;
+    const actions = document.createElement("div");
+    actions.className = "item-actions";
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.textContent = "Download";
+    a.style.display = "inline-block";
+    a.style.padding = "8px 12px";
+    a.style.border = "1px solid #ddd";
+    a.style.borderRadius = "10px";
+    a.style.textDecoration = "none";
+    actions.appendChild(a);
+    row.appendChild(actions);
+    downloadsEl.appendChild(row);
+  }
+  async function convertBatch() {
     setError("");
     setStatus("");
     resetOutput();
-
-    if (!originalImage || !originalFile) {
-      setError("Please select an image first.");
+    if (!sourceFiles.length) {
+      setError("Select one or more images first.");
       return;
     }
-
+    if (!window.JSZip) {
+      setError("ZIP library failed to load. Refresh and try again.");
+      return;
+    }
     const outType = format.value;
-    const q = getQuality();
-
-    setStatus("Converting…");
-
-    const canvas = document.createElement("canvas");
-    canvas.width = originalImage.naturalWidth;
-    canvas.height = originalImage.naturalHeight;
-
-    // If output is JPG and the image has transparency, we might want a white background.
-    const ctx = canvas.getContext("2d", { alpha: true });
-    if (!ctx) {
-      setError("Your browser does not support canvas.");
-      setStatus("");
-      return;
-    }
-
-    // If converting to JPG, optionally paint a white background first.
-    if (outType === "image/jpeg" && transparentBg.checked) {
-      ctx.save();
-      ctx.fillStyle = "#ffffff";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.restore();
-    }
-
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = "high";
-    ctx.drawImage(originalImage, 0, 0);
-
+    const outQuality = Math.max(0.1, Math.min(0.95, Number(quality.value) / 100 || 0.85));
     const usesQuality = outType === "image/jpeg" || outType === "image/webp";
-    const blob = await new Promise((resolve) => {
-      canvas.toBlob((b) => resolve(b), outType, usesQuality ? q : undefined);
-    });
+    const zip = new window.JSZip();
+    downloadsEl.innerHTML = "";
+    setProgress(0, sourceFiles.length);
 
-    if (!blob) {
-      setError("Failed to export the converted image.");
+    try {
+      for (let i = 0; i < sourceFiles.length; i++) {
+        const file = sourceFiles[i];
+        const img = await loadImage(file);
+        const canvas = document.createElement("canvas");
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        const ctx = canvas.getContext("2d", { alpha: true });
+        if (!ctx) throw new Error("Canvas is not available in this browser.");
+        if (outType === "image/jpeg" && transparentBg.checked) {
+          ctx.fillStyle = "#ffffff";
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+        ctx.drawImage(img, 0, 0);
+        const blob = await new Promise((resolve) => canvas.toBlob((b) => resolve(b), outType, usesQuality ? outQuality : undefined));
+        if (!blob) throw new Error(`Failed to convert "${file.name}".`);
+
+        const base = window.FileTools?.toSafeBaseName(file.name) || file.name.replace(/\.[^.]+$/, "");
+        const ext = outType === "image/jpeg" ? "jpg" : outType === "image/webp" ? "webp" : "png";
+        const filename = window.FileTools?.makeDownloadName(base, "converted", ext) || `${base}-converted.${ext}`;
+        addDownloadRow(file.name, blob, filename);
+        zip.file(filename, blob);
+
+        if (i === 0) {
+          const outUrl = URL.createObjectURL(blob);
+          activeUrls.push(outUrl);
+          previewOut.src = outUrl;
+          previewOut.style.display = "";
+          metaOut.textContent = `${img.naturalWidth} x ${img.naturalHeight} px - ${humanBytes(blob.size)} - ${outType}`;
+        }
+        setStatus(`Processed ${i + 1}/${sourceFiles.length}`);
+        setProgress(i + 1, sourceFiles.length);
+      }
+      const zipBlob = await zip.generateAsync({ type: "blob" });
+      const zipName = window.FileTools?.makeDownloadName("images", "converted-batch", "zip") || "images-converted-batch.zip";
+      const zipUrl = URL.createObjectURL(zipBlob);
+      activeUrls.push(zipUrl);
+      zipBtn.disabled = false;
+      zipBtn.onclick = () => {
+        const a = document.createElement("a");
+        a.href = zipUrl;
+        a.download = zipName;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      };
+      setStatus("Done.");
+    } catch (e) {
+      setError(e.message || "Conversion failed.");
       setStatus("");
-      return;
     }
-
-    outputBlob = blob;
-    outputObjectURL = URL.createObjectURL(blob);
-
-    previewOut.src = outputObjectURL;
-    previewOut.style.display = "";
-
-    const ratio = blob.size / originalFile.size;
-    const pct = Number.isFinite(ratio) ? `${Math.round(ratio * 100)}%` : "";
-
-    metaOut.textContent =
-      `${canvas.width} × ${canvas.height} px • ${humanBytes(blob.size)} • ${outType}` +
-      (pct ? ` • ${pct} of original` : "");
-
-    downloadBtn.disabled = false;
-    setStatus("Done.");
   }
-
-  function downloadOutput() {
-    setError("");
-    if (!outputBlob || !outputObjectURL) {
-      setError("Nothing to download yet.");
-      return;
-    }
-
-    const baseName = (originalFile?.name || "image").replace(/\.[^.]+$/, "");
-    const ext =
-      outputBlob.type === "image/jpeg" ? "jpg" :
-      outputBlob.type === "image/webp" ? "webp" :
-      "png";
-
-    const filename = `${baseName}-${Date.now()}.${ext}`;
-
-    const a = document.createElement("a");
-    a.href = outputObjectURL;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-  }
-
   function wireDropzone() {
     dropzone.addEventListener("click", () => fileInput.click());
     dropzone.addEventListener("keydown", (e) => {
@@ -225,12 +222,10 @@
         fileInput.click();
       }
     });
-
     fileInput.addEventListener("change", () => {
-      const file = fileInput.files && fileInput.files[0];
-      if (file) loadFile(file);
+      if (fileInput.files?.length) loadFiles(fileInput.files);
+      fileInput.value = "";
     });
-
     ["dragenter", "dragover"].forEach((evt) => {
       dropzone.addEventListener(evt, (e) => {
         e.preventDefault();
@@ -238,7 +233,6 @@
         dropzone.style.borderColor = "#bbb";
       });
     });
-
     ["dragleave", "drop"].forEach((evt) => {
       dropzone.addEventListener(evt, (e) => {
         e.preventDefault();
@@ -246,26 +240,24 @@
         dropzone.style.borderColor = "#ddd";
       });
     });
-
     dropzone.addEventListener("drop", (e) => {
-      const file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
-      if (file) loadFile(file);
+      if (e.dataTransfer?.files?.length) loadFiles(e.dataTransfer.files);
     });
   }
 
-  // Wire UI
   qualityVal.textContent = String(quality.value);
   quality.addEventListener("input", () => {
     qualityVal.textContent = String(quality.value);
     resetOutput();
   });
-
-  format.addEventListener("change", updateQualityUI);
+  format.addEventListener("change", () => {
+    updateQualityUI();
+    resetOutput();
+  });
   transparentBg.addEventListener("change", resetOutput);
-
-  convertBtn.addEventListener("click", convertImage);
-  downloadBtn.addEventListener("click", downloadOutput);
+  convertBtn.addEventListener("click", convertBatch);
+  clearBtn.addEventListener("click", () => resetAll(true));
 
   wireDropzone();
-  updateQualityUI();
+  resetAll(false);
 })();

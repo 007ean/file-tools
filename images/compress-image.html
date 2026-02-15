@@ -1,90 +1,101 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Resize Image – No Upload</title>
+  <title>Compress Image (Batch) | Free Online File Tool</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Use Compress Image (Batch) online for free. Process files locally in your browser with no uploads or tracking." />
   <link rel="stylesheet" href="../css/site.css" />
   <script defer src="../js/site.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <script defer src="../js/compress-image.js"></script>
 </head>
 <body>
-
 <header>
   <div class="nav">
     <a class="brand" href="../index.html">File Tools</a>
-    <a href="../images/resize-image.html">Image</a>
-    <a href="../pdf/">PDF</a>
-    <a href="../utilities/">Utilities</a>
+    <a href="../images/index.html">Image</a>
+    <a href="../pdf/index.html">PDF</a>
+    <a href="../utilities/index.html">Utilities</a>
   </div>
   <p class="trust">Files never leave your device. No uploads. Works in your browser.</p>
 </header>
 
 <main>
-  <h1 class="tool-title">Compress Image</h1>
-  <p class="tool-desc">Reduce file size by adjusting quality — privately in your browser.</p>
+  <h1 class="tool-title">Compress Image (Batch)</h1>
+  <p class="tool-desc">Compress one or many images at once, privately in your browser.</p>
 
   <section class="card" id="tool">
-  <div class="grid">
-    <div>
-      <label class="label">1) Choose an image</label>
-      <div id="dropzone" class="dropzone" tabindex="0" role="button" aria-label="Drop an image here or click to select">
-        <strong>Drop image here</strong>
-        <div class="hint">or click to select (JPG / PNG / WebP)</div>
-        <input id="fileInput" type="file" accept="image/*" hidden />
+    <div class="grid">
+      <div>
+        <label class="label">1) Choose image files</label>
+        <div id="dropzone" class="dropzone" tabindex="0" role="button" aria-label="Drop images here or click to select">
+          <strong>Drop images here</strong>
+          <div class="hint">or click to select (JPG / PNG / WebP, multiple allowed)</div>
+          <input id="fileInput" type="file" accept="image/*" multiple hidden />
+        </div>
+        <div id="fileInfo" class="hint" style="margin-top:8px;"></div>
       </div>
-      <div id="fileInfo" class="hint" style="margin-top:8px;"></div>
-    </div>
 
-    <div>
-      <label class="label">2) Compression settings</label>
-
-      <div class="box">
-        <label class="label" for="quality">Quality</label>
-        <input id="quality" type="range" min="10" max="95" value="80" />
-        <div class="row" style="justify-content:space-between;">
-          <div class="hint">Lower = smaller file</div>
-          <div class="hint"><span id="qualityVal">80</span>%</div>
+      <div>
+        <label class="label">2) Compression settings</label>
+        <div class="box">
+          <label class="label" for="quality">Quality</label>
+          <input id="quality" type="range" min="10" max="95" value="80" />
+          <div class="row" style="justify-content:space-between;">
+            <div class="hint">Lower = smaller file</div>
+            <div class="hint"><span id="qualityVal">80</span>%</div>
+          </div>
+          <label class="row" style="margin-top:10px;">
+            <input id="toJpeg" type="checkbox" checked />
+            Convert to JPG (best compression)
+          </label>
         </div>
 
-        <label class="row" style="margin-top:10px;">
-          <input id="toJpeg" type="checkbox" checked />
-          Convert to JPG (best compression)
-        </label>
-        <div class="hint">If unchecked, output keeps PNG when possible (bigger files).</div>
+        <div class="row" style="margin-top:12px;">
+          <button id="compressBtn" disabled>Compress</button>
+          <button id="zipBtn" disabled>Download ZIP</button>
+          <button id="clearBtn" disabled>Clear</button>
+        </div>
+        <div class="progress-wrap">
+          <progress id="progressBar" max="100" value="0" hidden></progress>
+        </div>
+        <div id="status" class="hint" style="margin-top:10px;"></div>
+        <div id="error" class="error" style="display:none;"></div>
       </div>
+    </div>
 
-      <div class="row" style="margin-top:12px;">
-        <button id="compressBtn" disabled>Compress</button>
-        <button id="downloadBtn" disabled>Download</button>
+    <hr style="margin:16px 0; border:none; border-top:1px solid #eee;" />
+    <div class="grid">
+      <div>
+        <label class="label">Original (first file)</label>
+        <img id="previewIn" alt="Original preview" style="max-width:100%; display:none;" />
+        <div id="metaIn" class="hint"></div>
       </div>
-
-      <div id="status" class="hint" style="margin-top:10px;"></div>
-      <div id="error" class="error" style="display:none;"></div>
+      <div>
+        <label class="label">Compressed (first output)</label>
+        <img id="previewOut" alt="Compressed preview" style="max-width:100%; display:none;" />
+        <div id="metaOut" class="hint"></div>
+      </div>
     </div>
-  </div>
 
-  <hr style="margin:16px 0; border:none; border-top:1px solid #eee;" />
-
-  <div class="grid">
-    <div>
-      <label class="label">Original</label>
-      <img id="previewIn" alt="Original preview" style="max-width:100%; display:none;" />
-      <div id="metaIn" class="hint"></div>
+    <div style="margin-top:14px;">
+      <label class="label">Downloads</label>
+      <div id="downloads" class="list"></div>
     </div>
-    <div>
-      <label class="label">Compressed</label>
-      <img id="previewOut" alt="Compressed preview" style="max-width:100%; display:none;" />
-      <div id="metaOut" class="hint"></div>
-    </div>
-  </div>
-</section>
-
-
-  <section style="margin-top:16px">
-    <h2>How it works</h2>
-    <p class="hint">We’ll add a short explanation here for SEO and trust.</p>
   </section>
+  <!-- SEO Blocks Start -->
+  <section class="card seo-block"><h2>How to Use</h2><ol><li>Add your file(s) to the tool.</li><li>Choose your settings and run the process.</li><li>Download the result to your device.</li></ol></section>
+  <section class="card seo-block"><h2>FAQ</h2><p><strong>Is Compress Image (Batch) private?</strong><br />Yes. Processing runs locally in your browser and files are not uploaded.</p><p><strong>Can I use this tool for free?</strong><br />Yes. This tool is free to use with no account required.</p></section>
+  <section class="card seo-block"><h2>Related Image Tools</h2><ul>
+      <li><a href="../images/pad-image.html">Add Border / Pad Image to Aspect Ratio</a></li>
+      <li><a href="../images/convert-image.html">Convert Image (Batch)</a></li>
+      <li><a href="../images/crop-image.html">Crop Image</a></li>
+      <li><a href="../images/image-to-pdf.html">Image to PDF</a></li>
+    </ul></section>
+  <script type="application/ld+json">{"@context":"https://schema.org","mainEntity":[{"acceptedAnswer":{"text":"Yes. Processing runs locally in your browser and files are not uploaded.","@type":"Answer"},"name":"Is Compress Image (Batch) private?","@type":"Question"},{"acceptedAnswer":{"text":"Yes. This tool is free to use with no account required.","@type":"Answer"},"name":"Can I use this tool for free?","@type":"Question"}],"@type":"FAQPage"}</script>
+  <script type="application/ld+json">{"name":"Compress Image (Batch)","applicationCategory":"UtilitiesApplication","@context":"https://schema.org","description":"Use Compress Image (Batch) online for free. Process files locally in your browser with no uploads or tracking.","operatingSystem":"Any","@type":"SoftwareApplication","offers":{"price":"0","priceCurrency":"USD","@type":"Offer"}}</script>
+  <!-- SEO Blocks End -->
 </main>
 
 <footer>
@@ -94,6 +105,7 @@
     <a href="../about.html">About</a>
   </div>
 </footer>
-
 </body>
 </html>
+
+
