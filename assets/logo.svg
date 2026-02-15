@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="ForgeFiles logo">
+  <defs>
+    <linearGradient id="forgeGradient" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0B2E3C" />
+      <stop offset="100%" stop-color="#0EA5A4" />
+    </linearGradient>
+  </defs>
+  <rect x="6" y="6" width="88" height="88" rx="20" fill="url(#forgeGradient)" />
+  <path d="M34 25c0-3.3 2.7-6 6-6h28v10H44v14h20v10H44v22H34V25z" fill="#fff" />
+</svg>
