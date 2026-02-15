@@ -9,17 +9,67 @@
   <script defer src="js/site.js"></script>
 </head>
 <body>
-<header><div class="nav"><a class="brand" href="index.html">File Tools</a><a href="images/index.html">Image</a><a href="pdf/index.html">PDF</a><a href="utilities/index.html">Utilities</a></div><p class="trust">Files never leave your device. No uploads. Works in your browser.</p></header>
+<header>
+  <div class="nav">
+    <a class="brand" href="index.html">File Tools</a>
+    <a href="images/index.html">Image</a>
+    <a href="pdf/index.html">PDF</a>
+    <a href="utilities/index.html">Utilities</a>
+  </div>
+  <p class="trust">Files never leave your device. No uploads. Works in your browser.</p>
+</header>
 <main>
-  <h1 class="tool-title">Free File Tools</h1>
-  <p class="tool-desc">Privacy-first tools for images, PDFs, and everyday file utilities. Everything runs locally in your browser.</p>
+  <section class="card category-hero">
+    <h1 class="tool-title">Free File Tools</h1>
+    <p class="tool-desc">Privacy-first tools for images, PDFs, and everyday file utilities. Everything runs locally in your browser.</p>
+    <div class="chip-row">
+      <span class="chip">No uploads</span>
+      <span class="chip">Fast local processing</span>
+      <span class="chip">Works on Cloudflare Pages</span>
+    </div>
+  </section>
+
   <section class="category-grid">
-    <article class="card"><h2>Image Tools</h2><p class="hint">Resize, compress, convert, and edit images for web or documents.</p><ul><li><a href="images/resize-image.html">Resize Image</a></li><li><a href="images/compress-image.html">Compress Image</a></li><li><a href="images/image-to-pdf.html">Image to PDF</a></li></ul><a class="button-link" href="images/index.html">View all</a></article>
-    <article class="card"><h2>PDF Tools</h2><p class="hint">Merge, split, reorder, convert, and edit PDF files quickly.</p><ul><li><a href="pdf/merge-pdf.html">Merge PDF</a></li><li><a href="pdf/split-pdf.html">Split PDF</a></li><li><a href="pdf/pdf-to-png.html">PDF to PNG</a></li></ul><a class="button-link" href="pdf/index.html">View all</a></article>
-    <article class="card"><h2>Utilities</h2><p class="hint">Format data, generate hashes, remove metadata, and more.</p><ul><li><a href="utilities/remove-metadata.html">Remove Image Metadata</a></li><li><a href="utilities/file-hash.html">File Hash Generator</a></li><li><a href="utilities/json-formatter.html">JSON Formatter</a></li></ul><a class="button-link" href="utilities/index.html">View all</a></article>
+    <article class="card">
+      <h2>Image Tools</h2>
+      <p class="hint">Resize, compress, convert, and edit images for web or documents.</p>
+      <div class="tool-grid">
+        <a class="tool-card" href="images/resize-image.html"><strong>Resize Image</strong><span>Resize one or many images with quality controls.</span></a>
+        <a class="tool-card" href="images/compress-image.html"><strong>Compress Image</strong><span>Reduce file size while preserving visual quality.</span></a>
+        <a class="tool-card" href="images/image-to-pdf.html"><strong>Image to PDF</strong><span>Combine image files into shareable PDF output.</span></a>
+      </div>
+      <a class="button-link primary" href="images/index.html">View all</a>
+    </article>
+
+    <article class="card">
+      <h2>PDF Tools</h2>
+      <p class="hint">Merge, split, reorder, convert, and edit PDF files quickly.</p>
+      <div class="tool-grid">
+        <a class="tool-card" href="pdf/merge-pdf.html"><strong>Merge PDF</strong><span>Combine multiple PDF files in the right order.</span></a>
+        <a class="tool-card" href="pdf/split-pdf.html"><strong>Split PDF</strong><span>Extract selected pages into a new PDF file.</span></a>
+        <a class="tool-card" href="pdf/pdf-to-png.html"><strong>PDF to PNG</strong><span>Render PDF pages as high-quality PNG images.</span></a>
+      </div>
+      <a class="button-link primary" href="pdf/index.html">View all</a>
+    </article>
+
+    <article class="card">
+      <h2>Utilities</h2>
+      <p class="hint">Format data, generate hashes, remove metadata, and more.</p>
+      <div class="tool-grid">
+        <a class="tool-card" href="utilities/remove-metadata.html"><strong>Remove Image Metadata</strong><span>Strip EXIF metadata before sharing images.</span></a>
+        <a class="tool-card" href="utilities/file-hash.html"><strong>File Hash Generator</strong><span>Create hashes for integrity verification.</span></a>
+        <a class="tool-card" href="utilities/json-formatter.html"><strong>JSON Formatter</strong><span>Beautify and validate JSON quickly.</span></a>
+      </div>
+      <a class="button-link primary" href="utilities/index.html">View all</a>
+    </article>
   </section>
 </main>
-<footer><div class="nav"><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a href="about.html">About</a></div></footer>
+<footer>
+  <div class="nav">
+    <a href="privacy.html">Privacy</a>
+    <a href="terms.html">Terms</a>
+    <a href="about.html">About</a>
+  </div>
+</footer>
 </body>
 </html>
-
