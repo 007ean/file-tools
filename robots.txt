@@ -1,4 +1,7 @@
-﻿User-agent: *
+User-agent: *
 Allow: /
 
-Sitemap: https://your-domain.com/sitemap.xml
+# Sanity check after deploy:
+# 1) Visit https://forgefiles.tools/sitemap.xml and confirm no "your-domain.com" remains.
+# 2) Visit https://forgefiles.tools/robots.txt and confirm this sitemap line is correct.
+Sitemap: https://forgefiles.tools/sitemap.xml
